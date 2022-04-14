@@ -11,6 +11,8 @@ import reactor.test.StepVerifier;
 
 import java.time.Duration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class ReactorPracticeApplicationTests {
 
 	/**
@@ -45,8 +47,12 @@ class ReactorPracticeApplicationTests {
 				.log();
 
 		flux.doOnNext(num->System.out.println(num)).subscribe();
+
 		StepVerifier.create(flux)
-				.expectNextCount(50)
+				.thenConsumeWhile(num -> {
+					assertThat(num%2==0);
+					return true;
+				})
 				.verifyComplete();
 	}
 
@@ -101,6 +107,12 @@ class ReactorPracticeApplicationTests {
 
 		flux.doOnNext(g->System.out.println(g.getName())).subscribe();
 
+		StepVerifier.create(flux)
+				.expectSubscription()
+				.assertNext(p->assertThat(p.getName()).isEqualTo("JOHN"))
+				.assertNext(p->assertThat(p.getName()).isEqualTo("JACK"))
+				.verifyComplete();
+
 	}
 
 
@@ -138,7 +150,7 @@ class ReactorPracticeApplicationTests {
 				.filter(str -> str.length() >= 5)
 				.flatMap(str -> Flux.just(str.toUpperCase()))
 						.subscribeOn(Schedulers.boundedElastic())
-				.repeat(1)
+						.repeat(1)
 						.log();
 
 		StepVerifier.create(sentence)
