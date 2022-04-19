@@ -64,6 +64,7 @@ class ReactorPracticeApplicationTests {
 
 		Flux<String> flux = Flux.just("hello", "there")
 				.delayElements(Duration.ofSeconds(1))
+				.publish()
 				.log();
 
 
